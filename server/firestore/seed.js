@@ -20,19 +20,43 @@ const axios = require('axios');
 // });
 
 //add brand to database
-const addBrand = (name, store1, store2, store3, store4, store5, store6) => {
+function addBrand(name, storeName) {
+  // console.log(arguments[1]);
   return db
-    .collection('brands')
+    .collection('brands3')
     .doc(name)
     .set({
       name: name,
-      sephora: store1 ? store1 : false,
-      ulta: store2 ? store2 : false,
-      glowieco: store3 ? store3 : false,
-      sokoglam: store4 ? store4 : false,
-      yesstyle: store5 ? store5 : false,
-      kollectionk: store6 ? store6 : false,
+      sephora: storeName === 'sephora' ? true : false,
+      ulta: storeName === 'ulta' ? true : false,
+      glowieco: storeName === 'glowieco' ? true : false,
+      sokoglam: storeName === 'sokoglam' ? true : false,
+      yesstyle: storeName === 'yesstyle' ? true : false,
+      kollectionk: storeName === 'kollectionk' ? true : false,
     });
+}
+// const addBrand = (name, storeName) => {
+//   return db
+//     .collection('brands2')
+//     .doc(name)
+//     .set({
+//       name: name,
+//       // sephora: storeName === 'sephora' ? true : false,
+//       // ulta: storeName === 'ulta' ? true : false,
+//       // glowieco: storeName === 'glowieco' ? true : false,
+//       // sokoglam: storeName === 'sokoglam' ? true : false,
+//       // yesstyle: storeName === 'yesstyle' ? true : false,
+//       // kollectionk: storeName === 'kollectionk' ? true : false,
+//       arguments[1]: true,
+//     });
+// };
+
+const checkBrand = async name => {
+  console.log('checkbrand: ', name);
+  return db
+    .collection('brands')
+    .where('name', '==', name)
+    .get();
 };
 
 const sephora = async () => {
@@ -50,6 +74,38 @@ const sephora = async () => {
     .catch(console.error);
 };
 
+//shopify sites
+const sokoglam = async () => {
+  return axios('https://sokoglam.com/products.json').then(res => {
+    const products = res.data.products;
+    const sgBrands = products.map(item => {
+      const name = item.vendor;
+      // console.log(name);
+      return name;
+    });
+    // console.log(sgBrands);
+    // return sgBrands;
+    let sgSet = new Set(sgBrands);
+    // console.log(sgSet);
+    return sgSet;
+  });
+};
+
+const shopify = async website => {
+  return axios(`https://${website}.com/products.json`).then(res => {
+    const products = res.data.products;
+    const sgBrands = products.map(item => {
+      const name = item.vendor;
+      // console.log(name);
+      return name;
+    });
+    // console.log(sgBrands);
+    // return sgBrands;
+    let sgSet = new Set(sgBrands);
+    // console.log(sgSet);
+    return sgSet;
+  });
+};
 // const ulta = async () => {
 //   return axios('https://www.ulta.com/global/nav/allbrands.jsp')
 //     .then(res => {
@@ -92,12 +148,66 @@ const sephora = async () => {
 //   }).catch(console.error)
 // };
 
-// const brands = sephora();
-// brands.then(items => {
-//   items.map((i, element) => {
-//     addBrand(element, true);
-//   });
-// });
-ulta();
+const scrapeSephora = () => {
+  sephora().then(items => {
+    items.map((i, element) => {
+      addBrand(element.toUpperCase(), 'sephora');
+    });
+  });
+};
 
+let shopifySites = [
+  'sokoglam',
+  // 'glowieco',
+  // 'oo35mm',
+  // 'kollectionk',
+  // 'peachandlily',
+];
+
+// sokoglam.then(items => {
+//   items.forEach(val =>
+//     checkBrand(val).then(res => {
+//       if (!res.size) {
+//         addBrand(val, false, false, true);
+//         console.log('brand:', val, 'has been added');
+//       } else {
+//         res.update({ site: true });
+//       }
+//     })
+//   );
+// });
+
+const scrapeShopify = async array => {
+  array.forEach(site => {
+    const data = shopify(site).then(items => {
+      // console.log('currently working on ', site);
+      console.log(items);
+      items.forEach(val =>
+        checkBrand(val.toUpperCase()).then(res => {
+          // console.log(site, 'is currently looking at brand ', val);
+          // console.log(res);
+          if (!res.size) {
+            addBrand(val, site);
+            console.log(site, ':     brand:', val, 'has been added');
+          } else if (!res[site]) {
+            console.log('this site does not exist in the entry');
+            let brand = db.collection('brands').doc(val);
+            brand.update({ [`${site}`]: true });
+            console.log(brand[site]);
+          } else {
+            console.log('this brand already exists in our database:');
+            console.log(res.site);
+          }
+        })
+      );
+    });
+  });
+};
+
+const main = async function(array) {
+  await scrapeSephora();
+  await scrapeShopify(array);
+};
+
+main(shopifySites);
 // console.log(brands);
