@@ -68,40 +68,39 @@ const shopify = async website => {
 const ulta = async () => {
   return axios('https://www.ulta.com/global/nav/allbrands.jsp')
     .then(res => {
+      const brands = [];
       const html = res.data;
       const $ = cheerio.load(html);
-      let allBrands = [];
-      const ultaBrands = $(
-        '.first_column, .second_column, .third_column, .fourth_column'
-      ).map((i, element) => {
-        const cleaned = $(element).map((i, el) => {
-          const text = $(el)
-            .text()
-            .replace(/\n/g, '')
-            .trim()
-            .split(/\t/g);
-
-          for (let i = 0; i < text.length; i++) {
-            text[i].trim();
-          }
-
-          let results = text.filter(word => word.length > 2);
-          // console.log(results);
-          return results;
-        });
-        // console.log(cleaned[0]);
-        // allBrands.concat(cleaned);
-        // console.log(allBrands);
-        return cleaned;
+      const array = $('.all-brands-sublisting').map((i, element) => {
+        const el = $(element)
+          .children() //shows all children of all-brands-sublisting
+          .children() //pointing to the uls
+          .map((i, ul) => {
+            //loop through each ul
+            const columns = $(ul)
+              .children() //looking at the li in each column
+              .map((i, name) => {
+                //for each li
+                const a = $(name)
+                  .text()
+                  .trim();
+                // .then(res => {
+                brands.push(a);
+                // });
+                // console.log('BRANDS:', brands);
+                // return a;
+              });
+            // return columns[0];
+          });
+        // return el;
       });
-      console.log(cleaned);
-      return allBrands.concat(ultaBrands);
+      // console.log(brands);
+      return brands;
     })
     .catch(console.error);
 };
 
-// ulta();
-
+ulta();
 const yesstyle = async () => {
   return axios(
     'https://www.yesstyle.com/en/brands/list.html/bpt.300?badid=14072'
@@ -113,29 +112,9 @@ const yesstyle = async () => {
         const name = $(element)
           .children()
           .text();
-        // .text()
-        // .trim();
-        console.log(name);
+        // console.log(name);
         return name;
       });
-
-      // const ysBrands = $('.brandListSection').map((i, element) => {
-      //   const tag = $(element)
-      //     .children()
-      //     .next()
-      //     // .html();
-      //     //this is the div containing hrefs?
-      //     .map((i, el) => {
-      //       const url = $(el)
-      //         // .attr('href')
-      //         .text();
-      //       console.log('URL:', url);
-      //     });
-      //   return tag;
-      // });
-      // console.log(tag);
-
-      // console.log(ysBrands);
       return ysBrands;
     })
     .catch(console.error);
@@ -148,6 +127,14 @@ const scrapeSephora = () => {
   sephora().then(items => {
     items.map((i, element) => {
       addBrand(element.toUpperCase(), 'sephora');
+    });
+  });
+};
+
+const scrapeUlta = () => {
+  ulta().then(items => {
+    items.map(element => {
+      addBrand(element.toUpperCase(), 'ulta');
     });
   });
 };
@@ -165,26 +152,7 @@ const scrapeShopify = async array => {
     shopify(site).then(items => {
       items.forEach(
         val =>
-          // checkBrand(val.toUpperCase()).then(res => {
-          //   console.log(site, 'is currently looking at brand ', val);
-          // console.log(res);
-          // console.log(res[site]);
           addBrand(val.toUpperCase(), site)
-        // if (!res.size) {
-        //   addBrand(val, site);
-        //   console.log(site, ':brand:', val, 'has been added');
-        // } else {
-        //   console.log('this site does not exist in the entry');
-        //   addBrand(val, site);
-        //   // let setup = brand.set({ [`${site}`]: true }, { merge: true });
-
-        //   // console.log(brand.get().data());
-        //   // } else {
-        //   //   console.log('this brand already exists in our database:');
-        //   //   console.log(res.site);
-        // }
-        // })
-        // );
       );
     });
   });
@@ -199,10 +167,11 @@ const scrapeYesstyle = () => {
 };
 
 // calling functions to sync database
-// const main = async function(array) {
-//   await scrapeSephora();
-//   await scrapeShopify(array);
-//   await scrapeYesstyle();
-// };
+const main = async function(array) {
+  await scrapeSephora();
+  await scrapeUlta();
+  await scrapeShopify(array);
+  await scrapeYesstyle();
+};
 
-// main(shopifySites);
+main(shopifySites);

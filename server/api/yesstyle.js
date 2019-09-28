@@ -16,15 +16,7 @@ router.get('/', async (req, res, next) => {
         .text();
       data.push(name);
     });
-    // console.log($(returnEl).text());
     res.send(data);
-
-    // const sephoraBrands = $('.css-kxa5od').map((i, element) => {
-    //   const name = $(element).text();
-    //   return { name };
-    // });
-    // // return sephoraBrands;
-    // res.send(sephoraBrands);
   } catch (error) {
     next(error);
   }

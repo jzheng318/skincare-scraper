@@ -9,31 +9,45 @@ router.get('/', async (req, res, next) => {
       'https://www.ulta.com/global/nav/allbrands.jsp'
     );
     const $ = await cheerio.load(result.data);
-    const array = $(
-      '.first_column, .second_column, .third_column, .fourth_column'
-    ).map((i, element) => {
-      $(element).each((i, el) => {
-        const text = $(el)
-          .text()
-          .replace(/\n/g, '')
-          .trim()
-          .split(/\t/g);
-        //   const name = text
-        //     .replace(/\n/g, '')
-        //     .trim()
-        //     .split(/\t/g);
-        //   let brandArray = name.trim().split(/\t/g);
+    // const array = $(
+    //   '.first_column, .second_column, .third_column, .fourth_column'
+    // ).map((i, element) => {
+    //   $(element).each((i, el) => {
+    //     const text = $(el)
+    //       .text()
+    //       .replace(/\n/g, '')
+    //       .trim()
+    //       .split(/\t/g)
+    //       .filter(word => word.length > 2);
 
-        for (let i = 0; i < text.length; i++) {
-          text[i].trim();
-        }
+    //     data = data.concat(text);
+    //   });
+    // });
+    // console.log(array);
 
-        let results = text.filter(word => word.length > 2);
+    const array = $('.all-brands-sublisting').map((i, element) => {
+      const el = $(element);
+      const letter = el
+        .children()
+        .eq(0)
+        .text();
+      //   console.log(letter);
 
-        data = data.concat(results);
-      });
+      const nameLi = el
+        .children()
+        .children()
+        .map((i, text) => {
+          const columns = $(text)
+            .children()
+            .map((i, name) => {
+              const a = $(name)
+                .text()
+                .trim();
+              data.push(a);
+            });
+        });
     });
-    console.log(array);
+
     res.send(data);
   } catch (error) {
     next(error);
@@ -41,3 +55,27 @@ router.get('/', async (req, res, next) => {
 });
 
 module.exports = router;
+
+// let allBrands = [];
+// const ultaBrands = $(
+//   '.first_column, .second_column, .third_column, .fourth_column'
+// ).map((i, element) => {
+//   const cleaned = $(element).map((i, el) => {
+//     const text = $(el)
+//       .text()
+//       .replace(/\n/g, '')
+//       .trim()
+//       .split(/\t/g)
+//       .filter(word => word.length > 1);
+
+//     // console.log(text);
+//     return text;
+//   });
+//   // console.log(cleaned);
+//   // console.log(cleaned[0]);
+//   // allBrands.concat(cleaned);
+//   // console.log(allBrands);
+//   return allBrands.concat(cleaned);
+// });
+// console.log(allBrands);
+// return allBrands.concat(ultaBrands)
