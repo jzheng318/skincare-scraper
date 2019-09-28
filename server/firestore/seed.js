@@ -22,7 +22,7 @@ function addBrand(name, storeName) {
     );
 }
 
-// check if brand already exists in the database 
+// check if brand already exists in the database
 // const checkBrand = async name => {
 //   return db
 //     .collection('brands')
@@ -47,17 +47,19 @@ const sephora = async () => {
 };
 
 //shopify sites
+//for simplicity we're only using the first page of the results
+//for pagination, add '$?page=1' at the end of the link
 const shopify = async website => {
-  return axios(`https://${website}.com/products.json`).then(res => {
+  return axios(`https://${website}.com/products.json?limit=250`).then(res => {
     const products = res.data.products;
-    const sgBrands = products.map(item => {
+    const shopifyBrands = products.map(item => {
       let name = item.vendor.trim();
       if (name[name.length - 1] === '.') {
         name = name.slice(0, name.length - 1);
       }
       return name;
     });
-    let sgSet = new Set(sgBrands);
+    let sgSet = new Set(shopifyBrands);
     return sgSet;
   });
 };
@@ -142,10 +144,7 @@ let shopifySites = [
 const scrapeShopify = async array => {
   array.forEach(site => {
     shopify(site).then(items => {
-      items.forEach(
-        val =>
-          addBrand(val.toUpperCase(), site)
-      );
+      items.forEach(val => addBrand(val.toUpperCase(), site));
     });
   });
 };
