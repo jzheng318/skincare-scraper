@@ -22,13 +22,13 @@ function addBrand(name, storeName) {
     );
 }
 
-const checkBrand = async name => {
-  // console.log('checkbrand:', name);
-  return db
-    .collection('brands')
-    .where('name', '==', name)
-    .get();
-};
+// check if brand already exists in the database 
+// const checkBrand = async name => {
+//   return db
+//     .collection('brands')
+//     .where('name', '==', name)
+//     .get();
+// };
 
 const sephora = async () => {
   return axios('https://www.sephora.com/brands-list')
@@ -38,11 +38,9 @@ const sephora = async () => {
       const sephoraBrands = $('.css-kxa5od').map((i, element) => {
         const name = $(element)
           .text()
-          // .replace('.', ' ')
           .trim();
         return name;
       });
-      // console.log(sephoraBrands);
       return sephoraBrands;
     })
     .catch(console.error);
@@ -84,17 +82,10 @@ const ulta = async () => {
                 const a = $(name)
                   .text()
                   .trim();
-                // .then(res => {
                 brands.push(a);
-                // });
-                // console.log('BRANDS:', brands);
-                // return a;
               });
-            // return columns[0];
           });
-        // return el;
       });
-      // console.log(brands);
       return brands;
     })
     .catch(console.error);
@@ -131,6 +122,7 @@ const scrapeSephora = () => {
   });
 };
 
+//since ulta() returns an array, we want to map through all elements of the array
 const scrapeUlta = () => {
   ulta().then(items => {
     items.map(element => {
