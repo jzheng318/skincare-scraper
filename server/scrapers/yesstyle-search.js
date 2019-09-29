@@ -38,7 +38,6 @@ const yesstyleSearch = async keyword => {
         let catEnd = item[6].lastIndexOf('>FD|Beauty');
         //yesstyle products have a boolean for when its available
         if (item[7]) {
-          // console.log('item exists');
           yesstyleProducts[item[1]] = {
             product: item[1],
             price: item[8],
@@ -48,7 +47,6 @@ const yesstyleSearch = async keyword => {
           };
         }
       }
-      //   console.log(yesstyleProducts);
       return yesstyleProducts;
     })
     .catch(console.error);
