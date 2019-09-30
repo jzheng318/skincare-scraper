@@ -40,13 +40,18 @@ router.get('/:keyword', async (req, res, next) => {
         //in this, case, we will redirect the user to the product page
         if (products) {
           return products.map(product => {
+            let image = `http://sephora.com${product.image450}`;
+            let url = `http://www.sephora.com${product.targetUrl}`;
             sephoraProducts[product.productName] = {
               brand: product.brandName,
               product: product.productName,
-              image: `www.sephora.com${product.image450}`,
-              price: product.currentSku.listPrice,
+              image: image,
+              price: product.currentSku.listPrice.slice(1),
               rating: product.rating,
-              url: `www.sephora.com${product.targetUrl}`,
+              url: url,
+              store: 'Sephora',
+              exclusive: product.currentSku.isSephoraExclusive,
+
               // this.otherInfo = obj.currentSku;
             };
             productArray.push(sephoraProducts[product.productName]);
@@ -60,8 +65,8 @@ router.get('/:keyword', async (req, res, next) => {
       res.send(productArray);
     } else {
       res
-        .status(404)
-        .send('Please go directly to sephora for this information');
+        // .status(404)
+        .send([]);
     }
   } catch (error) {
     next(error);
