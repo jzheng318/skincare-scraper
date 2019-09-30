@@ -40,12 +40,16 @@ export const searchThunk = keyword => async dispatch => {
     );
     let peachandlilyData = peachandlily.data;
 
+    const yesstyle = await axios.get(`/api/yesstyle/${keyword}`);
+    let yesstyleData = yesstyle.data;
+
     let allProducts = sokoglamData.concat(
       glowiecoData,
       oo35mmData,
       kollectionkData,
       peachandlilyData,
-      sephoraData
+      sephoraData,
+      yesstyleData
     );
     dispatch(searchProducts(allProducts));
   } catch (error) {

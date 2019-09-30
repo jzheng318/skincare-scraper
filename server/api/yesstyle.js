@@ -25,12 +25,14 @@ router.get('/', async (req, res, next) => {
 router.get('/:keyword', async (req, res, next) => {
   try {
     const keyword = req.params.keyword;
-
+    let yesStyleProducts = {};
+    let productArray = [];
     const result = await axios.get(
       `https://www.yesstyle.com/en/list.html?q=${keyword}&bpt=48`
     );
     const $ = await cheerio.load(result.data);
     const html = $('.itemContainer').map((i, element) => {
+      // console.log('~~~~~~~NEW ITEM~~~~~~~~~~');
       const itemContainer = $(element);
       const itemStatus = itemContainer
         .children()
@@ -40,39 +42,80 @@ router.get('/:keyword', async (req, res, next) => {
         .children('.itemDiscount.flex-auto');
       // console.log($(discount).text());
       // return discount;
-      const itemInfo = itemContainer.children('a');
-      console.log(itemInfo);
-      // const url = itemInfo.attr('href');
-      // console.log($(url).html());
+      const itemUrl = $('.itemContainer a').attr('href');
 
-      // const itemImg= itemInfo.children('img')
-      // console.log(${itemImg}.html)
+      const itemName = itemContainer
+        .children()
+        .next()
+        .children('.itemTitle')
+        .text();
+
+      let sepIdx = itemName.indexOf(' - ');
+      let brandName = itemName.slice(0, sepIdx);
+      const itemPrice = itemContainer
+        .children()
+        .next()
+        .children('.itemPrice')
+        .text();
+
+      let price = itemPrice.slice(4);
+
+      const itemImg = itemContainer
+        .children()
+        .next() //a tag
+        .children() //children of a tag
+        .children('img')
+        .attr('src');
+
+      const itemRating = itemContainer
+        .children()
+        .next() //a tag
+        .children() //children of a tag
+        .next() //itemTitle
+        .next() //itemPrice
+        .next()
+        .children('.icon.colored')
+        .attr('ng-style');
+
+      //shows up as {{::ratingPercent(93.10000000000001)}}
+      let starRating;
+      if (itemRating) {
+        let rating = parseFloat(itemRating.slice(18, 23));
+        starRating = rating / 25;
+      } else {
+        starRating = null;
+      }
+
+      // console.log(starRating);
+
+      const numRating = itemContainer
+        .children()
+        .next() //a tag
+        .children() //children of a tag
+        .next() //itemTitle
+        .next() //itemPrice
+        .next()
+        .children('.reviewCount')
+        .text();
+      // .attr('ng-style');
+      // console.log(numRating);
+
+      yesStyleProducts[itemName] = {
+        brand: brandName,
+        product: itemName,
+        image: itemImg,
+        price: price,
+        rating: starRating,
+        numRatings: numRating,
+        url: itemUrl,
+        store: 'YesStyle',
+        exclusive: false,
+      };
+
+      productArray.push(yesStyleProducts[itemName]);
     });
-    // .then(res => {
-    // let data = [];
-    // const schema = res.data.schema;
-    // //products is an object where each key is the item
-    // const products = res.data.products;
-
-    // for (let key in products) {
-    //   let item = products[key];
-    //   let catEnd = item[6].lastIndexOf('>FD|Beauty');
-    //   //yesstyle products have a boolean for when its available
-    //   if (item[7]) {
-    //     // console.log('item exists');
-    //     data.push({
-    //       product: item[1],
-    //       price: item[8],
-    //       image: item[5],
-    //       category: item[6].substring(0, catEnd),
-    //       url: item[2],
-    //     });
-    // //   }
-    // }
-    // return data;
-
-    // });
-    res.send('complete');
+    // console.log(yesStyleProducts);
+    res.send(productArray);
   } catch (error) {
     next(error);
   }
