@@ -3,6 +3,11 @@ const cheerio = require('cheerio');
 const axios = require('axios');
 const db = require('../firestore/index');
 
+// router.use((req, res, next) => {
+//   res.header('Access-Control-Allow-Origin', '*');
+//   next();
+// });
+
 router.get('/', async (req, res, next) => {
   try {
     let data = [];
@@ -10,17 +15,54 @@ router.get('/', async (req, res, next) => {
     const $ = await cheerio.load(result.data);
     const returnEl = $('.css-kxa5od').each((i, element) => {
       let name = $(element).text();
-      data[i] = name + ',';
+      data.push(name);
     });
-    console.log($(returnEl).text());
     res.send(data);
+  } catch (error) {
+    next(error);
+  }
+});
 
-    // const sephoraBrands = $('.css-kxa5od').map((i, element) => {
-    //   const name = $(element).text();
-    //   return { name };
-    // });
-    // // return sephoraBrands;
-    // res.send(sephoraBrands);
+//keywords must be split by %20
+router.get('/:keyword', async (req, res, next) => {
+  try {
+    const keyword = req.params.keyword;
+    console.log(keyword);
+    let sephoraProducts = {};
+    let productArray = [];
+    const products = await axios
+      .get(
+        `https://www.sephora.com/api/catalog/search?type=keyword&q=${keyword}&content=true&includeRegionsMap=true&page=60&currentPage=1`
+      )
+      .then(res => {
+        const products = res.data.products;
+        //sephora's brand pages will sometimes redirect to the actual product page, not search results.
+        //in this, case, we will redirect the user to the product page
+        if (products) {
+          return products.map(product => {
+            sephoraProducts[product.productName] = {
+              brand: product.brandName,
+              product: product.productName,
+              image: `www.sephora.com${product.image450}`,
+              price: product.currentSku.listPrice,
+              rating: product.rating,
+              url: `www.sephora.com${product.targetUrl}`,
+              // this.otherInfo = obj.currentSku;
+            };
+            productArray.push(sephoraProducts[product.productName]);
+          });
+        }
+        console.log(products);
+        return products;
+      });
+
+    if (products) {
+      res.send(productArray);
+    } else {
+      res
+        .status(404)
+        .send('Please go directly to sephora for this information');
+    }
   } catch (error) {
     next(error);
   }
