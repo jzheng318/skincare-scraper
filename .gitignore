@@ -2,14 +2,14 @@
 
 # dependencies
 /node_modules
-/.pnp
-.pnp.js
+# /.pnp
+# .pnp.js
 
-# testing
-/coverage
+# # testing
+# /coverage
 
-# production
-/build
+# # production
+# /build
 
 # misc
 .DS_Store
@@ -26,4 +26,4 @@ yarn-error.log*
 /server/firestore/scrapeup-gh-firebase-adminsdk-zbc92-30422246fe.json
 
 #local api routes for testing
-/server/api
+# /server/api
