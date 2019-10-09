@@ -1,3 +1,13 @@
+## Makeup Scraper
+
+A data scraping project that allows users to make better buying decisions.
+
+### Set Up:
+
+- npm install
+- npm start
+- node server/index.js
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts

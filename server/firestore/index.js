@@ -1,11 +1,11 @@
-const admin = require('firebase-admin');
+// const admin = require('firebase-admin');
 
-let serviceAccount = require('./scrapeup-gh-firebase-adminsdk-zbc92-30422246fe.json');
+// let serviceAccount = require('./scrapeup-gh-firebase-adminsdk-zbc92-30422246fe.json');
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
+// admin.initializeApp({
+//   credential: admin.credential.cert(serviceAccount),
+// });
 
-let db = admin.firestore();
+// let db = admin.firestore();
 
-module.exports = db;
+// module.exports = db;
