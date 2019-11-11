@@ -17,7 +17,7 @@ router.get('/', async (req, res, next) => {
         .children()
         .eq(0)
         .text();
-      //   console.log(letter);
+      // console.log(letter);
 
       const nameLi = el
         .children()
@@ -40,5 +40,23 @@ router.get('/', async (req, res, next) => {
   }
 });
 
-module.exports = router;
+//route for getting results of each brand
+router.get('/:brand', async (req, res, next) => {
+  try {
+    let brand = req.params.brand;
+    // let brand = keyword.replace(' ', '-');
+    let product = {};
+    let productArray = ['help'];
 
+    const result = await axios.get(`https://www.ulta.com/brand/${brand}`);
+    const $ = await cheerio.load(result.data);
+    const html = $('.productQvContainer').text();
+    console.log(html);
+
+    res.send(productArray);
+  } catch (error) {
+    next(error);
+  }
+});
+
+module.exports = router;
