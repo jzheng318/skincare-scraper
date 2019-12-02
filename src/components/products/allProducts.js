@@ -10,12 +10,16 @@ const AllProducts = props => {
   console.log(products);
   return (
     <div className="row">
-      {/* <div className="col s4"> */}
+      {/* <div className="col s12"> */}
       {products.map(product => (
-        <SingleProduct
-          key={`${product.brand}|${product.product}|${product.price}`}
-          product={product}
-        />
+        // <div class="row">
+        <div class="col s4">
+          <SingleProduct
+            key={`${product.brand}|${product.product}|${product.price}`}
+            product={product}
+          />
+          {/* </div> */}
+        </div>
       ))}
       {/* </div> */}
     </div>
